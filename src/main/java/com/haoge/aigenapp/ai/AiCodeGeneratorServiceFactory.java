@@ -86,9 +86,9 @@ public class AiCodeGeneratorServiceFactory {
                 .builder()
                 .id(appId)
                 .chatMemoryStore(redisChatMemoryStore)
-                .maxMessages(20)
+                .maxMessages(40)  //由20改为40，解决工具无限循环调用的情况
                 .build();
-        chatHistoryService.loadChatHistoryToMemory(appId, chatMemory, 20);
+        chatHistoryService.loadChatHistoryToMemory(appId, chatMemory, 40);
         //区分vue 工程项目和普通项目使用不同模型
         return switch (codeGenType) {
             case VUE_PROJECT -> {

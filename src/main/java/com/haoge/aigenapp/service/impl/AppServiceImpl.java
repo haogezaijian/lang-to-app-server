@@ -22,6 +22,8 @@ import com.haoge.aigenapp.model.enums.ChatHistoryMessageTypeEnum;
 import com.haoge.aigenapp.model.enums.CodeGenTypeEnum;
 import com.haoge.aigenapp.model.vo.user.UserVO;
 import com.haoge.aigenapp.model.vo.app.AppVO;
+import com.haoge.aigenapp.monitor.MonitorContext;
+import com.haoge.aigenapp.monitor.MonitorContextHolder;
 import com.haoge.aigenapp.service.ChatHistoryService;
 import com.haoge.aigenapp.service.ScreenshotService;
 import com.haoge.aigenapp.service.UserService;
@@ -183,10 +185,21 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>  implements AppS
         }
         //5.保存用户消息
         chatHistoryService.addChatMessage(appId, message, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
+        //设置监控上下文
+        MonitorContextHolder.setContext(
+                MonitorContext.builder()
+                        .appId(appId.toString())
+                        .userId(loginUser.getId().toString())
+                        .build()
+        );
         // 6. 调用 AI 生成代码
         Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
         //7.收集AI响应内容 并且在完成后保存记录到对话历史
-        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum);
+        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum)
+                .doFinally(signalType -> {
+                    // 移除监控上下文
+                    MonitorContextHolder.clearContext();
+                });
     }
 
 
