@@ -6,6 +6,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.haoge.lang2app.exception.BusinessException;
 import com.haoge.lang2app.exception.ErrorCode;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.JavascriptExecutor;
@@ -26,7 +27,6 @@ public class WebScreenshotUtils {
     private static final WebDriver webDriver;
 
     static {
-        System.setProperty("webdriver.chrome.driver", "D:/Program Files/chromDriver/chromedriver-win64/chromedriver.exe");
         final int DEFAULT_WIDTH = 1600;
         final int DEFAULT_HEIGHT = 900;
         webDriver = initChromeDriver(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -87,7 +87,7 @@ public class WebScreenshotUtils {
     private static WebDriver initChromeDriver(int width, int height) {
         try {
             // 自动管理 ChromeDriver
-//            WebDriverManager.chromedriver().setup();
+            WebDriverManager.chromedriver().setup();
             // 配置 Chrome 选项
             ChromeOptions options = new ChromeOptions();
             // 无头模式
